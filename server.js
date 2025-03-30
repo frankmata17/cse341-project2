@@ -4,12 +4,11 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-
-const userRoutes = require('./routes/userRoutes');
-const taskRoutes = require('./routes/taskRoutes');
+const passport = require('passport');
+const session = require('express-session');
+const { Strategy: GitHubStrategy } = require('passport-github2'); // Destructure to rename
 
 dotenv.config();
-
 const server = express();
 
 // Connect to database
@@ -18,6 +17,53 @@ connectDB();
 // Middleware
 server.use(cors());
 server.use(express.json());
+
+// Session middleware
+server.use(session({
+  secret: process.env.SESSION_SECRET || 'defaultsecret',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// Initialize Passport
+server.use(passport.initialize());
+server.use(passport.session());
+
+// Define GitHub Strategy inline
+passport.use(new GitHubStrategy(
+  {
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: process.env.CALLBACK_URL, // e.g., http://localhost:5001/api/auth/github/callback
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    try {
+      // Here, find or create your user based on the GitHub profile
+      // For example:
+      // let user = await User.findOne({ githubId: profile.id });
+      // if (!user) {
+      //   user = new User({ githubId: profile.id, username: profile.username, ... });
+      //   await user.save();
+      // }
+      // return done(null, user);
+
+      return done(null, profile); // Temporary placeholder
+    } catch (error) {
+      return done(error, null);
+    }
+  }
+));
+
+// For session-based serialization
+passport.serializeUser((user, done) => {
+  // In a real app, you’d typically serialize the user’s ID
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  // And here you’d find the user by ID in the database
+  done(null, obj);
+});
 
 // Swagger Setup
 const swaggerOptions = {
@@ -30,7 +76,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5001/api',  // Update this if needed for deployment
+        url: 'http://localhost:5001/api',
       },
     ],
     components: {
@@ -67,20 +113,20 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./routes/**/*.js'],  // Path to your route files for Swagger documentation
+  apis: ['./routes/**/*.js'],
 };
 
-// Initialize Swagger
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
-// Serve Swagger UI
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
-server.use('/api/tasks', taskRoutes);  // Ensure '/api/tasks' is correctly mapped to taskRoutes
-server.use('/api', userRoutes);  // Ensure '/api' is mapped to userRoutes
+const userRoutes = require('./routes/userRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
-// Start the server
+server.use('/api/tasks', taskRoutes);
+server.use('/api/users', userRoutes);
+
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

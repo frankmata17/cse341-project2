@@ -1,5 +1,6 @@
 const express = require('express');
 const { createTask, getTasks, updateTask, deleteTask } = require('../controllers/taskController');
+const authenticate = require('../middleware/authenticate');
 const router = express.Router();
 
 /**
@@ -36,7 +37,7 @@ router.get('/', getTasks);
  *       400:
  *         description: Invalid input
  */
-router.post('/', createTask);
+router.post('/', authenticate, createTask);
 
 /**
  * @swagger
@@ -60,7 +61,7 @@ router.post('/', createTask);
  *       400:
  *         description: Invalid task ID or data
  */
-router.put('/:id', updateTask);
+router.put('/:id', authenticate, updateTask);
 
 /**
  * @swagger
@@ -78,6 +79,6 @@ router.put('/:id', updateTask);
  *       400:
  *         description: Task not found
  */
-router.delete('/:id', deleteTask);
+router.delete('/:id', authenticate, deleteTask);
 
 module.exports = router;

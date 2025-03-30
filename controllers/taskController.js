@@ -2,23 +2,23 @@ const Task = require('../models/task');
 
 // Create a new task
 exports.createTask = async (req, res) => {
-  const { title, description, dueDate, priority } = req.body;  // Removed assignedTo
+  const { title, description, dueDate, priority } = req.body;
 
   try {
-    console.log('Creating Task with data:', req.body); // Log the input data
+    console.log('Creating Task with data:', req.body);
 
     // Validate required fields
     if (!title || !description || !dueDate) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Create and save the task without the assignedTo field
+    // Create and save the task
     const task = new Task({ title, description, dueDate, priority });
     await task.save();
-    console.log('Task created:', task); // Log the created task
+    console.log('Task created:', task);
     res.status(201).json(task);
   } catch (error) {
-    console.error('Error creating task:', error); // Log error details
+    console.error('Error creating task:', error);
     res.status(500).json({ error: 'Error creating task' });
   }
 };
@@ -26,10 +26,10 @@ exports.createTask = async (req, res) => {
 // Get all tasks
 exports.getTasks = async (req, res) => {
   try {
-    console.log('Fetching all tasks...'); // Log the request
+    console.log('Fetching all tasks...');
 
     // Retrieve tasks from the database
-    const tasks = await Task.find();  // We are no longer using populate as 'assignedTo' is removed.
+    const tasks = await Task.find();
     
     // Log the tasks to see what is being retrieved
     console.log('Fetched tasks:', tasks);
@@ -42,14 +42,14 @@ exports.getTasks = async (req, res) => {
     // Send tasks as response
     res.json(tasks);
   } catch (error) {
-    console.error('Error fetching tasks:', error); // Log error details
+    console.error('Error fetching tasks:', error);
     res.status(500).json({ error: 'Error fetching tasks' });
   }
 };
 
 // Update a task
 exports.updateTask = async (req, res) => {
-  const { title, description, dueDate, status, priority } = req.body;  // Removed assignedTo
+  const { title, description, dueDate, status, priority } = req.body;
 
   try {
     const task = await Task.findByIdAndUpdate(

@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
+const passport = require('passport');
 
 // Register a new user
 exports.registerUser = async (req, res) => {
@@ -14,20 +14,21 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// Login user and generate JWT token
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (error) {
-    res.status(400).json({ error: 'Error logging in' });
-  }
+// Login user using Passport Local Strategy
+exports.loginUser = (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(400).json({ error: info.message || 'Invalid credentials' });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      // Return minimal user info (avoid sending sensitive data)
+      return res.json({ message: 'Login successful', user: { id: user._id, email: user.email } });
+    });
+  })(req, res, next);
 };
