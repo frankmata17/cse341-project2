@@ -1,6 +1,6 @@
 const express = require('express');
 const { createTask, getTasks, updateTask, deleteTask } = require('../controllers/taskController');
-const authenticate = require('../middleware/authenticate');
+const authenticate = require('../middleware/authenticate'); // if you have an auth middleware
 const router = express.Router();
 
 /**
@@ -18,7 +18,7 @@ const router = express.Router();
  *               items:
  *                 $ref: '#/components/schemas/Task'
  */
-router.get('/', getTasks);
+router.get('/tasks', getTasks);
 
 /**
  * @swagger
@@ -37,7 +37,7 @@ router.get('/', getTasks);
  *       400:
  *         description: Invalid input
  */
-router.post('/', authenticate, createTask);
+router.post('/tasks', authenticate, createTask);
 
 /**
  * @swagger
@@ -61,7 +61,7 @@ router.post('/', authenticate, createTask);
  *       400:
  *         description: Invalid task ID or data
  */
-router.put('/:id', authenticate, updateTask);
+router.put('/tasks/:id', authenticate, updateTask);
 
 /**
  * @swagger
@@ -79,6 +79,6 @@ router.put('/:id', authenticate, updateTask);
  *       400:
  *         description: Task not found
  */
-router.delete('/:id', authenticate, deleteTask);
+router.delete('/tasks/:id', authenticate, deleteTask);
 
 module.exports = router;

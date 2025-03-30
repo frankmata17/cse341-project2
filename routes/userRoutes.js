@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /users/register:
+ * /register:
  *   post:
  *     summary: Register a new user
  *     requestBody:
@@ -31,7 +31,7 @@ router.post('/register', registerUser);
 
 /**
  * @swagger
- * /users/login:
+ * /login:
  *   post:
  *     summary: Login a user using local authentication
  *     requestBody:
@@ -63,7 +63,7 @@ router.post('/login', loginUser);
  *         description: Redirects to GitHub for authentication
  */
 router.get('/login', (req, res) => {
-  res.redirect('/api/auth/github');
+  res.redirect('/auth/github');
 });
 
 /**
@@ -89,12 +89,11 @@ router.get('/auth/github', passport.authenticate('github', { scope: ['user:email
  *         description: Authentication failed
  */
 router.get('/auth/github/callback', 
-    passport.authenticate('github', { failureRedirect: '/users/login' }),
-    (req, res) => {
-      // Instead of redirecting, send a JSON response:
-      res.json({ message: 'GitHub login successful', user: req.user });
-    }
-  );
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.json({ message: 'GitHub login successful', user: req.user });
+  }
+);
 
 /**
  * @swagger
@@ -106,13 +105,13 @@ router.get('/auth/github/callback',
  *         description: User logged out successfully
  */
 router.get('/logout', (req, res, next) => {
-    req.logout(err => {
-      if (err) { return next(err); }
-      req.session.destroy((error) => {
-        if (error) return next(error);
-        res.redirect('/goodbye.html');
-      });
+  req.logout(err => {
+    if (err) { return next(err); }
+    req.session.destroy(error => {
+      if (error) return next(error);
+      res.status(200).json({ message: 'You have been logged out successfully' });
     });
   });
+});
 
 module.exports = router;

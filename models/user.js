@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs');
 const UserSchema = new mongoose.Schema({
   username:  { type: String, required: true },
   email:     { type: String, required: true, unique: true },
-  password:  { type: String },              // Optional: For OAuth users, password might not be provided
-  githubId:  { type: String }               // Optional field for GitHub OAuth
+  password:  { type: String },
+  githubId:  { type: String } 
 });
 
 // Pre-save hook: hash the password if it exists and is modified

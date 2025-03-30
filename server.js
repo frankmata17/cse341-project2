@@ -6,7 +6,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const passport = require('passport');
 const session = require('express-session');
-const { Strategy: GitHubStrategy } = require('passport-github2'); // Destructure to rename
+const { Strategy: GitHubStrategy } = require('passport-github2');
 
 dotenv.config();
 const server = express();
@@ -34,7 +34,7 @@ passport.use(new GitHubStrategy(
   {
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_URL,
+    callbackURL: process.env.GITHUB_CALLBACK_URL,
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -76,7 +76,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5001/api',
+        url: 'http://localhost:5001/',
       },
     ],
     components: {
@@ -124,8 +124,8 @@ server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
-server.use('/api/tasks', taskRoutes);
-server.use('/api/users', userRoutes);
+server.use('/', taskRoutes);
+server.use('/', userRoutes);
 
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
