@@ -34,7 +34,7 @@ passport.use(new GitHubStrategy(
   {
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: process.env.CALLBACK_URL, // e.g., http://localhost:5001/api/auth/github/callback
+    callbackURL: process.env.CALLBACK_URL,
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
